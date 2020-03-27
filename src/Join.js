@@ -1,17 +1,62 @@
 import React, { useState, useContext } from "react";
 import { AuthContext } from "./index";
+import * as firebase from 'firebase'
+import { withRouter } from 'react-router-dom';
 
-const Join = () => {
+const Join = ({history}) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setErrors] = useState("");
+  const [isLoggedIn, setLoggedIn] = useState("false");
 
   const Auth = useContext(AuthContext);
   const handleForm = e => {
     e.preventDefault();
-    console.log(Auth);
-    Auth.setLoggedIn(true);
+
+    firebase
+    .auth()
+    .setPersistence(firebase.auth.Auth.Persistence.SESSION)
+      .then(() => {
+        firebase
+        .auth()
+        .createUserWithEmailAndPassword(email, password)
+        .then(res => {
+          console.log(res)
+          history.push('/reports')
+          if (res.user) Auth.setLoggedIn(true);
+        })
+        .catch(e => {
+          setErrors(e.message);
+        });
+      })
+
   };
+
+  const logout = () => {
+    Auth.setLoggedIn(false);
+    firebase.auth().signOut()
+    setLoggedIn(false)
+ }
+
+  const handleGoogleLogin = () => {
+    const provider = new firebase.auth.GoogleAuthProvider();
+
+    firebase
+    .auth()
+    .setPersistence(firebase.auth.Auth.Persistence.SESSION)
+      .then(() => {
+        firebase
+        .auth()
+        .signInWithPopup(provider)
+        .then(result => {
+          console.log(result)
+          history.push('/reports')
+          Auth.setLoggedIn(true)
+        })
+        .catch(e => setErrors(e.message))
+      })
+ 
+  }
 
   return (
     <div>
@@ -32,7 +77,7 @@ const Join = () => {
           placeholder="password"
         />
         <hr />
-        <button class="googleBtn" type="button">
+        <button onClick={() => handleGoogleLogin()} className="googleBtn" type="button">
           <img
             src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg"
             alt="logo"
@@ -44,8 +89,16 @@ const Join = () => {
 
         <span>{error}</span>
       </form>
+      { isLoggedIn? (
+            <div>
+          
+            <h1>is logged in? : {isLoggedIn} </h1>
+              <button onClick = {() => logout() } type="button">Logout</button>
+              </div>
+          ) : null
+        }
     </div>
   );
 };
 
-export default Join;
+export default withRouter(Join);
