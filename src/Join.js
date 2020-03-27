@@ -7,6 +7,7 @@ const Join = ({history}) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setErrors] = useState("");
+  const [isLoggedIn, setLoggedIn] = useState("false");
 
   const Auth = useContext(AuthContext);
   const handleForm = e => {
@@ -30,6 +31,12 @@ const Join = ({history}) => {
       })
 
   };
+
+  const logout = () => {
+    Auth.setLoggedIn(false);
+    firebase.auth().signOut()
+    setLoggedIn(false)
+ }
 
   const handleGoogleLogin = () => {
     const provider = new firebase.auth.GoogleAuthProvider();
@@ -82,6 +89,14 @@ const Join = ({history}) => {
 
         <span>{error}</span>
       </form>
+      { isLoggedIn? (
+            <div>
+          
+            <h1>is logged in? : {isLoggedIn} </h1>
+              <button onClick = {() => logout() } type="button">Logout</button>
+              </div>
+          ) : null
+        }
     </div>
   );
 };

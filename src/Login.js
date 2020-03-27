@@ -9,6 +9,8 @@ const Login = ({history}) => {
   const [error, setErrors] = useState("");
 
   const Auth = useContext(AuthContext);
+  console.log(Auth)
+  
   const handleForm = e => {
 
     e.preventDefault();
@@ -29,6 +31,23 @@ const Login = ({history}) => {
       })
   
   };
+
+  const logout = () => {
+    console.log('Current logged in user UID', firebase.auth().currentUser)
+
+    firebase.auth().signOut().then(function() {
+      // Sign-out successful.
+      alert('Signed out ok')
+      history.push('/')
+      Auth.setLoggedIn(false);
+    }).catch(function(error) {
+      // An error happened.
+      alert('Sign out error')
+    });
+  
+   
+  }
+
 
   const signInWithGoogle = () => {
     const provider = new firebase.auth.GoogleAuthProvider();
@@ -77,6 +96,14 @@ const Login = ({history}) => {
         <button type="submit">Login</button>
         <span>{error}</span>
       </form>
+      { Auth.isLoggedIn && (
+            <div>
+          
+              <button onClick = {() => logout() } type="button">Logout</button>
+              </div>
+          ) 
+        }
+        
     </div>
   );
 };
